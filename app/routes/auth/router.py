@@ -1,3 +1,4 @@
+
 import os
 import random
 from datetime import timedelta
@@ -5,16 +6,28 @@ from email.message import EmailMessage
 
 import aiosmtplib
 from dotenv import load_dotenv
-from pydantic import EmailStr
 
-from . import *
-from app.api.users import oauth2_scheme, hash_password
-from ..schemas.ChangePasswordRequest import ChangePasswordRequest
-from ..schemas.EmailRequest import EmailRequest
-from ..schemas.ResetRequest import ResetRequest
+
+from app.routes.users.router import oauth2_scheme, hash_password
+from app.schemas.ChangePasswordRequest import ChangePasswordRequest
+from app.schemas.EmailRequest import EmailRequest
+from app.schemas.ResetRequest import ResetRequest
 
 import redis.asyncio as redis
-import time
+
+from app.db.models import User
+from app.db.session import get_async_db
+from app.security.security import decode_token, create_access_token
+
+from fastapi import HTTPException, status
+from fastapi import APIRouter, Depends
+
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from jose import JWTError
+
+router = APIRouter(prefix='/auth', tags=["auth"])
 
 
 load_dotenv()
@@ -22,7 +35,6 @@ load_dotenv()
 # Создание подключения к Redis
 redis_client = redis.from_url("redis://localhost:6379")
 
-router = APIRouter(prefix='/auth', tags=["auth"])
 
 
 @router.get("/validate")

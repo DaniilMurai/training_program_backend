@@ -1,9 +1,32 @@
-from . import *
-from ..schemas.TokenResponse import TokenResponse
+from app.db.models import User
+from app.db.session import get_async_db
+from app.security.security import decode_token, create_access_token, create_refresh_token, token_blacklist
+
+from fastapi import HTTPException, status
+from fastapi import APIRouter, Depends
+
+
+from app.schemas.UserSchema import UserSchema
+
+from passlib.context import CryptContext
+
+
+from fastapi import Body
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from jose import JWTError
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+# Настраиваем контекст хеширования (рекомендуется bcrypt)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+from app.schemas.TokenResponse import TokenResponse
 
 # Инициализация
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
-router = APIRouter(prefix="/users", tags=["users"])
+
 
 
 # Хелпер-функции (синхронные, но быстрые)

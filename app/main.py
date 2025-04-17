@@ -1,19 +1,18 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.openapi.utils import get_openapi
-from sqlalchemy.orm import Session
-from fastapi import Depends
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import users, auth
-from app.database import engine
-from app.models.UserModel import Base, User
-from app.schemas.UserSchema import UserSchema
+from app.db.session import engine
+from app.db.models import Base
 
-app = FastAPI()
 
-app.include_router(users.router)
-app.include_router(auth.router)
+from app.routes.router import router
+
+# app = router
+
+# app.include_router(users.router)
+# app.include_router(auth.router)
+# app.include_router(health.router)
 
 
 async def create_tables():
@@ -21,12 +20,12 @@ async def create_tables():
         await conn.run_sync(Base.metadata.create_all)
 
 # Запускаем создание таблиц при старте
-@app.on_event("startup")
+@router.on_event("startup")
 async def startup_event():
     await create_tables()
 
 
-app.add_middleware(
+router.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
     allow_credentials=True,
@@ -34,15 +33,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@router.get("/")
 def read_root():
     return {"message": "Hello, astAPI!"}
 
-@app.get("/ping")
+@router.get("/ping")
 def ping():
     return {"status": "alive"}
 
-@app.get("/resolve-code/{key}")
+@router.get("/resolve-code/{key}")
 def get_value(key: str, api_key: str):
     import requests
 

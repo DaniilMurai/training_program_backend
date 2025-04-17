@@ -1,15 +1,22 @@
+import os
 from datetime import datetime, timedelta
+
+from dotenv import load_dotenv
 from jose import jwt, JWTError
 from typing import Optional
+from app.core.config import settings
+load_dotenv()
 
-
-SECRET_KEY = "zPcKL4Nw5"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"  # Алгоритм подписи
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Время жизни токена
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 
+
 token_blacklist = set()
+
+
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Создает JWT-токен на основе переданных данных."""

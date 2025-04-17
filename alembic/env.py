@@ -2,7 +2,7 @@ from logging.config import fileConfig
 from sqlalchemy import pool  # Добавьте этот импорт
 from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
-from app.models.UserModel import Base
+from app.db.models import Base
 
 # Конфигурация Alembic
 config = context.config
