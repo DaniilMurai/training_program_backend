@@ -6,6 +6,7 @@ from app.db.session import get_async_db
 from app.dependencies.redis import RedisClient
 from app.services.auth_service import AuthService
 from app.services.email_service import EmailService
+from app.services.user_service import UserService
 
 
 async def get_email_service() -> EmailService:
@@ -16,11 +17,17 @@ async def get_redis_client() -> RedisClient:
     return RedisClient()
 
 
-
 async def get_auth_service(
-    redis: RedisClient = Depends(get_redis_client),
-    email_service: EmailService = Depends(get_email_service),
-    db: AsyncSession = Depends(get_async_db)
+        redis: RedisClient = Depends(get_redis_client),
+        email_service: EmailService = Depends(get_email_service),
+        db: AsyncSession = Depends(get_async_db)
 ) -> AuthService:
     auth_crud = AuthCRUD(db)
     return AuthService(redis, email_service, auth_crud)
+
+
+async def get_user_service(
+        db: AsyncSession = Depends(get_async_db)
+) -> UserService:
+    auth_crud = AuthCRUD(db)
+    return UserService(auth_crud)

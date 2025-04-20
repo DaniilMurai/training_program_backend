@@ -1,5 +1,5 @@
-from pydantic import Field, EmailStr  # Остальные импорты из pydantic
-from pydantic_settings import BaseSettings  # Новый импорт
+from pydantic import Field, EmailStr
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):

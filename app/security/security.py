@@ -12,10 +12,7 @@ ALGORITHM = "HS256"  # Алгоритм подписи
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Время жизни токена
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
-
-
 token_blacklist = set()
-
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -39,6 +36,7 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
     expire = datetime.utcnow() + (expires_delta or timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
     to_encode.update({"exp": expire, "type": "refresh"})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
 
 def decode_token(token: str):
     """Декодирует JWT и проверяет, не в черном списке ли он."""

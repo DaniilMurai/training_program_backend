@@ -1,5 +1,6 @@
 from redis.asyncio import Redis
 
+
 class RedisClient:
     def __init__(self):
         self.client = Redis.from_url("redis://localhost:6379")
@@ -12,4 +13,3 @@ class RedisClient:
 
     async def delete(self, key: str):
         return await self.client.delete(key)
-

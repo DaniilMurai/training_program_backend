@@ -63,10 +63,14 @@ class AuthService:
 
     async def change_password(self, request: ChangePasswordRequest):
 
-        result = await self.auth_crud.update_user_password(request.email, request.new_password)
+        db_user = await self.auth_crud.get_user_by_email(request.email)
+
+        user = await self.auth_crud.update_user_password(db_user, request.new_password)
+        await self.auth_crud.save_user_in_db(user)
         await self.redis.delete(f"reset:{request.email}")
 
-        return result
+        return {"success": True}
+
 
     async def send_reset_code(self, email: EmailStr):
         code = str(random.randint(100000, 999999))

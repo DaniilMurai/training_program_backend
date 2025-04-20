@@ -13,12 +13,10 @@ from app.services.auth_service import AuthService
 
 router = APIRouter(prefix='/auth', tags=["auth"])
 
-
 load_dotenv()
 
 # Создание подключения к Redis
 redis_client = redis.from_url("redis://localhost:6379")
-
 
 
 @router.get("/validate")
@@ -26,11 +24,10 @@ async def validate_token(token: str = Depends(oauth2_scheme)):
     return await help_validate_token(token)
 
 
-
 @router.post("/send-reset-password")
 async def send_reset_password(
-    email: Email,
-    auth_service: AuthService = AuthServiceDependency
+        email: Email,
+        auth_service: AuthService = AuthServiceDependency
 ):
     return await auth_service.send_reset_password(email.email)
 
@@ -49,7 +46,6 @@ async def change_password(
         auth_service: AuthService = AuthServiceDependency
 ):
     return await auth_service.change_password(request)
-
 
 
 @router.post("/send-confirmation-code")
