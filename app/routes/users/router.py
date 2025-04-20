@@ -1,21 +1,16 @@
-from app.db.models import User
-from app.db.session import get_async_db
-from app.security.security import decode_token, create_access_token, create_refresh_token, token_blacklist
-
-from fastapi import HTTPException, status
 from fastapi import APIRouter, Depends
-
-
-from app.schemas.UserSchema import UserSchema
-
-from passlib.context import CryptContext
-
-
 from fastapi import Body
+from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError
+from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from jose import JWTError
+
+from app.db.models import User
+from app.db.session import get_async_db
+from app.schemas.UserSchema import UserSchema
+from app.security.security import decode_token, create_access_token, create_refresh_token, token_blacklist
 
 router = APIRouter(prefix="/users", tags=["users"])
 

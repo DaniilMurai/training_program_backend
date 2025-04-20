@@ -1,10 +1,10 @@
 import os
 from datetime import datetime, timedelta
+from typing import Optional
 
 from dotenv import load_dotenv
 from jose import jwt, JWTError
-from typing import Optional
-from app.core.config import settings
+
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")

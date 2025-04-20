@@ -1,6 +1,5 @@
-from pydantic import EmailStr, field_validator
+from pydantic import EmailStr, BaseModel
 
-from . import BaseModel
 
 class UserSchema(BaseModel):
     id: int | None = None

@@ -1,5 +1,4 @@
-from . import BaseModel, EmailStr
-
+from pydantic import BaseModel, EmailStr
 
 
 class ResetRequest(BaseModel):

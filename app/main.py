@@ -1,11 +1,8 @@
 from fastapi import FastAPI, HTTPException
-
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.db.session import engine
 from app.db.models import Base
-
-
+from app.db.session import engine
 from app.routes.router import router
 
 # app = router
@@ -14,18 +11,21 @@ from app.routes.router import router
 # app.include_router(auth.router)
 # app.include_router(health.router)
 
+app = FastAPI()
+
+app.include_router(router)
 
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 # Запускаем создание таблиц при старте
-@router.on_event("startup")
+@app.on_event("startup")
 async def startup_event():
     await create_tables()
 
 
-router.add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
     allow_credentials=True,
@@ -33,15 +33,15 @@ router.add_middleware(
     allow_headers=["*"],
 )
 
-@router.get("/")
+@app.get("/")
 def read_root():
     return {"message": "Hello, astAPI!"}
 
-@router.get("/ping")
+@app.get("/ping")
 def ping():
     return {"status": "alive"}
 
-@router.get("/resolve-code/{key}")
+@app.get("/resolve-code/{key}")
 def get_value(key: str, api_key: str):
     import requests
 
