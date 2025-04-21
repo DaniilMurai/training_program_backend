@@ -124,19 +124,29 @@ class UserService:
             user_id: int,
             userdata: UserUpdateSchema
     ):
+        if not any([userdata.name, userdata.email, userdata.password]):
+            raise HTTPException(status_code=400, detail="No fields to update provided")
 
-        db_user = await self.auth_crud.get_user_by_id(user_id)
+        async with self.auth_crud.db.begin():
+            db_user = await self.auth_crud.get_user_by_id(user_id)
 
-        if userdata.name is not None:
-            db_user = await self.auth_crud.update_user_name(db_user, userdata.name)
+            fields_to_update = {}
 
-        if userdata.email is not None:
-            db_user = await self.auth_crud.update_user_email(db_user, userdata.email)
+            if userdata.name is not None:
+                fields_to_update["name"] = userdata.name
+            if userdata.email is not None:
+                fields_to_update["email"] = userdata.email
 
-        if userdata.password is not None:
-            db_user = await self.auth_crud.update_user_password(db_user, userdata.password)
+            if fields_to_update:
+                db_user = await self.auth_crud.update_user_fields(db_user, **fields_to_update)
 
-        return await self.auth_crud.save_user_in_db(db_user)
+            if userdata.password is not None:
+                db_user = await self.auth_crud.update_user_password(db_user, userdata.password)
+
+        # здесь транзакция уже закоммичена
+        await self.auth_crud.db.refresh(db_user)
+
+        return db_user
 
     async def delete_user(
             self,

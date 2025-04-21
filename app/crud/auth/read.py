@@ -14,6 +14,22 @@ class AuthCRUD:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def _check_unique_fields(self, exclude_user_id: int = None, **kwargs):
+        query = select(User)
+
+        # Добавляем все условия поля=значение
+        for field, value in kwargs.items():
+            query = query.where(getattr(User, field) == value)
+
+        # Исключаем пользователя, если нужно
+        if exclude_user_id:
+            query = query.where(User.id != exclude_user_id)
+
+        result = await self.db.execute(query)
+        if result.scalars().first():
+            fields_str = ', '.join(f"{key}='{value}'" for key, value in kwargs.items())
+            raise HTTPException(status_code=409, detail=f"User with {fields_str} already exists")
+
     async def get_users(self, skip: int, limit: int):
         result = await self.db.execute(select(User).offset(skip).limit(limit))
         return result.scalars().all()
@@ -34,6 +50,25 @@ class AuthCRUD:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
+        return user
+
+    async def update_user_fields(self, user: User, **fields_to_update):
+        # Проверяем: не обновляем ли мы поля на те же самые значения
+        same_fields = [
+            field for field, value in fields_to_update.items()
+            if getattr(user, field) == value
+        ]
+        if same_fields:
+            fields_str = ', '.join(same_fields)
+            raise HTTPException(status_code=409, detail=f"New values for {fields_str} match the current ones")
+
+        # Проверка на уникальность
+        await self._check_unique_fields(exclude_user_id=user.id, **fields_to_update)
+
+        # Обновляем поля
+        for field, value in fields_to_update.items():
+            setattr(user, field, value)
+        
         return user
 
     async def update_user_name(self, db_user: User, name: str) -> User:
